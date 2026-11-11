@@ -1,61 +1,59 @@
 @import "tailwindcss";
 
 @layer base {
+  :root {
+    color-scheme: light;
+    --velora-page: #f5f6f7;
+    --velora-surface: #ffffff;
+    --velora-text: #17212b;
+    --velora-muted: #697681;
+    --velora-border: #e3e8eb;
+    --velora-accent: #426d70;
+    --velora-accent-strong: #31585b;
+    --velora-accent-soft: #edf4f3;
+  }
+
   body {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    color: #0f172a;
-    background-color: #f8fafc; /* Base clara e elegante: marfim/cinza suave */
+    min-width: 320px;
+    min-height: 100vh;
     overflow-x: hidden;
+    color: var(--velora-text);
+    background: var(--velora-page);
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
     transition: background-color 0.2s ease, color 0.2s ease;
   }
 
   body.theme-dark {
-    color: #f8fafc;
-    background-color: #09090b;
+    color-scheme: dark;
+    --velora-page: #111719;
+    --velora-surface: #192124;
+    --velora-text: #edf2f2;
+    --velora-muted: #a0acad;
+    --velora-border: #2b383b;
+    --velora-accent: #8eb6b0;
+    --velora-accent-strong: #a4c9c3;
+    --velora-accent-soft: #202e30;
+    color: var(--velora-text);
+    background: var(--velora-page);
   }
+
+  * { scrollbar-width: thin; scrollbar-color: #c5ced0 transparent; }
+  body.theme-dark * { scrollbar-color: #3a484a transparent; }
+
+  ::selection { color: #17212b; background: #d7e7e4; }
+  :focus-visible { outline: 2px solid #5b8985; outline-offset: 2px; }
+
+  button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 }
 
-/* Custom scrollbars */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 9999px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-body.theme-dark ::-webkit-scrollbar-track {
-  background: #09090b;
-}
-
-body.theme-dark ::-webkit-scrollbar-thumb {
-  background: #27272a;
-}
-
-body.theme-dark ::-webkit-scrollbar-thumb:hover {
-  background: #3f3f46;
-}
-
-/* Base Clara e Elegante: Cartões Brancos e Bordas Limpas */
+/* Adapt legacy zinc-based dark surfaces for the light theme without globally
+   turning white text dark on colored buttons. */
 body:not(.theme-dark) .bg-zinc-950,
 body:not(.theme-dark) .bg-zinc-950\/90,
 body:not(.theme-dark) .bg-zinc-950\/80,
 body:not(.theme-dark) .bg-zinc-950\/70,
-body:not(.theme-dark) .bg-zinc-950\/60 {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
-}
-
+body:not(.theme-dark) .bg-zinc-950\/60,
 body:not(.theme-dark) .bg-zinc-900,
 body:not(.theme-dark) .bg-zinc-900\/90,
 body:not(.theme-dark) .bg-zinc-900\/80,
@@ -65,7 +63,22 @@ body:not(.theme-dark) .bg-zinc-900\/50,
 body:not(.theme-dark) .bg-zinc-900\/40,
 body:not(.theme-dark) .bg-zinc-900\/30 {
   background-color: #ffffff !important;
-  color: #0f172a !important;
+}
+
+body:not(.theme-dark) .bg-zinc-950.text-white,
+body:not(.theme-dark) .bg-zinc-950\/90.text-white,
+body:not(.theme-dark) .bg-zinc-950\/80.text-white,
+body:not(.theme-dark) .bg-zinc-950\/70.text-white,
+body:not(.theme-dark) .bg-zinc-950\/60.text-white,
+body:not(.theme-dark) .bg-zinc-900.text-white,
+body:not(.theme-dark) .bg-zinc-900\/90.text-white,
+body:not(.theme-dark) .bg-zinc-900\/80.text-white,
+body:not(.theme-dark) .bg-zinc-900\/70.text-white,
+body:not(.theme-dark) .bg-zinc-900\/60.text-white,
+body:not(.theme-dark) .bg-zinc-900\/50.text-white,
+body:not(.theme-dark) .bg-zinc-900\/40.text-white,
+body:not(.theme-dark) .bg-zinc-900\/30.text-white {
+  color: #17212b !important;
 }
 
 body:not(.theme-dark) .border-zinc-800,
@@ -75,112 +88,58 @@ body:not(.theme-dark) .border-zinc-800\/40,
 body:not(.theme-dark) .border-zinc-900,
 body:not(.theme-dark) .divide-zinc-900 > * + *,
 body:not(.theme-dark) .border-zinc-700,
-body:not(.theme-dark) .border-zinc-700\/80 {
-  border-color: #e2e8f0 !important;
-}
+body:not(.theme-dark) .border-zinc-700\/80 { border-color: #e3e8eb !important; }
 
-body:not(.theme-dark) .text-white {
-  color: #0f172a !important;
-}
+body:not(.theme-dark) .text-zinc-200 { color: #28343c !important; }
+body:not(.theme-dark) .text-zinc-300 { color: #3f4c54 !important; }
+body:not(.theme-dark) .text-zinc-400 { color: #697681 !important; }
+body:not(.theme-dark) .text-zinc-500 { color: #849098 !important; }
 
-body:not(.theme-dark) .text-zinc-200 {
-  color: #1e293b !important;
-}
-
-body:not(.theme-dark) .text-zinc-300 {
-  color: #334155 !important;
-}
-
-body:not(.theme-dark) .text-zinc-400 {
-  color: #64748b !important;
-}
-
-body:not(.theme-dark) .text-zinc-500 {
-  color: #94a3b8 !important;
-}
-
-body:not(.theme-dark) .hover\:bg-zinc-800:hover,
-body:not(.theme-dark) .hover\:bg-zinc-900\/60:hover,
-body:not(.theme-dark) .hover\:bg-zinc-900\/40:hover,
-body:not(.theme-dark) .hover\:bg-zinc-900\/30:hover {
-  background-color: #f1f5f9 !important;
-}
+body:not(.theme-dark) .hover\\:bg-zinc-800:hover,
+body:not(.theme-dark) .hover\\:bg-zinc-900\\/60:hover,
+body:not(.theme-dark) .hover\\:bg-zinc-900\\/40:hover,
+body:not(.theme-dark) .hover\\:bg-zinc-900\\/30:hover { background-color: #f0f3f4 !important; }
 
 body:not(.theme-dark) input,
 body:not(.theme-dark) select,
-body:not(.theme-dark) textarea {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
-  border-color: #cbd5e1 !important;
-}
+body:not(.theme-dark) textarea { color: #17212b; border-color: #d6dee1; }
 
-/* ============================================================
-   DIREÇÃO VISUAL DA VELORA: ÂMBAR REFINADO E TONS NEUTROS
-   "fundo marfim ou cinza muito suave, com cartões brancos"
-   "verde e vermelho reservados para estados"
-   ============================================================ */
-
-/* Botões e destaques padrão: Âmbar Dourado elegante e contrastante */
-.bg-amber-500,
+/* Recolor legacy amber utilities to the VELORA signature mineral teal. */
+.bg-amber-500, .bg-amber-600, .bg-amber-700,
 .bg-gradient-to-r.from-amber-500 {
-  background-color: #d97706 !important;
+  background-color: #426d70 !important;
   color: #ffffff !important;
 }
+.hover\\:bg-amber-600:hover, .hover\\:bg-amber-700:hover { background-color: #31585b !important; }
+.text-amber-400, .text-amber-500, .text-amber-600, .text-amber-700, .text-amber-800,
+.dark\\:text-amber-300, .dark\\:text-amber-400 { color: #426d70 !important; }
+.bg-amber-50, .bg-amber-100, .bg-amber-500\\/10, .bg-amber-500\\/15, .bg-amber-500\\/20 { background-color: #edf4f3 !important; }
+.border-amber-200, .border-amber-300, .border-amber-500, .border-amber-500\\/20, .border-amber-500\\/30 { border-color: #cbdedb !important; }
+body.theme-dark .text-amber-400, body.theme-dark .text-amber-500,
+body.theme-dark .text-amber-600, body.theme-dark .text-amber-700,
+body.theme-dark .text-amber-800, body.theme-dark .dark\\:text-amber-300,
+body.theme-dark .dark\\:text-amber-400 { color: #a4c9c3 !important; }
+body.theme-dark .bg-amber-50, body.theme-dark .bg-amber-100,
+body.theme-dark .bg-amber-500\\/10, body.theme-dark .bg-amber-500\\/15,
+body.theme-dark .bg-amber-500\\/20 { background-color: #202e30 !important; }
+body.theme-dark .border-amber-200, body.theme-dark .border-amber-300,
+body.theme-dark .border-amber-500, body.theme-dark .border-amber-500\\/20,
+body.theme-dark .border-amber-500\\/30 { border-color: #3b5555 !important; }
 
-.text-amber-400,
-.text-amber-500 {
-  color: #b45309 !important;
-}
-
-body.theme-dark .text-amber-400,
-body.theme-dark .text-amber-500 {
-  color: #fbbf24 !important;
-}
-
-/* Suporte opcional à paleta Cobalt (Azul Cobalto) */
-body.palette-cobalt .bg-amber-500,
-body.palette-cobalt .bg-gradient-to-r.from-amber-500 {
-  background-color: #2563eb !important;
-  color: #ffffff !important;
-}
-body.palette-cobalt .text-amber-400,
-body.palette-cobalt .text-amber-500 {
-  color: #2563eb !important;
-}
-body.palette-cobalt .border-amber-500,
-body.palette-cobalt .border-amber-500\/30 {
-  border-color: rgba(37, 99, 235, 0.4) !important;
-}
-
-/* Suporte opcional à paleta Emerald */
-body.palette-emerald .bg-amber-500,
-body.palette-emerald .bg-gradient-to-r.from-amber-500 {
-  background-color: #059669 !important;
-  color: #ffffff !important;
-}
-body.palette-emerald .text-amber-400,
-body.palette-emerald .text-amber-500 {
-  color: #059669 !important;
-}
-body.palette-emerald .border-amber-500,
-body.palette-emerald .border-amber-500\/30 {
-  border-color: rgba(5, 150, 105, 0.4) !important;
-}
-
-/* Cartões com sombra suave e borda sutil, sem ruído */
 .velora-card {
-  background-color: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--velora-surface);
+  border: 1px solid var(--velora-border);
   border-radius: 1rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px rgb(23 33 43 / 3%);
 }
+body.theme-dark .velora-card { box-shadow: none; }
+.font-tabular { font-variant-numeric: tabular-nums; }
 
-body.theme-dark .velora-card {
-  background-color: #121215;
-  border-color: #27272a;
-  box-shadow: none;
-}
-
-.font-tabular {
-  font-variant-numeric: tabular-nums;
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
