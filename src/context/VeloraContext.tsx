@@ -1,40 +1,13 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import {
-  Tenant,
-  Branch,
-  StaffMember,
-  ServiceCategory,
-  Service,
-  Customer,
-  Appointment,
-  FinancialTransaction,
-  CashSession,
-  AiInsight,
-  AppointmentStatus,
-  PaymentMethod,
-  UserRole,
-  InventoryItem,
-  MarketingCampaign,
-  ThemeMode,
-  ColorPalette,
-  ClubPlan,
-  ClubMember
+  Tenant, Branch, StaffMember, ServiceCategory, Service, Customer, Appointment,
+  FinancialTransaction, CashSession, AiInsight, AppointmentStatus, PaymentMethod,
+  UserRole, InventoryItem, MarketingCampaign, ThemeMode, ColorPalette, ClubPlan, ClubMember,
 } from '../types/velora';
 import {
-  INITIAL_TENANTS,
-  INITIAL_BRANCHES,
-  INITIAL_STAFF,
-  INITIAL_CATEGORIES,
-  INITIAL_SERVICES,
-  INITIAL_CUSTOMERS,
-  INITIAL_APPOINTMENTS,
-  INITIAL_TRANSACTIONS,
-  INITIAL_CASH_SESSION,
-  INITIAL_AI_INSIGHTS,
-  INITIAL_INVENTORY,
-  INITIAL_CAMPAIGNS,
-  INITIAL_CLUB_PLANS,
-  INITIAL_CLUB_MEMBERS
+  INITIAL_TENANTS, INITIAL_BRANCHES, INITIAL_STAFF, INITIAL_CATEGORIES, INITIAL_SERVICES,
+  INITIAL_CUSTOMERS, INITIAL_APPOINTMENTS, INITIAL_TRANSACTIONS, INITIAL_CASH_SESSION,
+  INITIAL_AI_INSIGHTS, INITIAL_INVENTORY, INITIAL_CAMPAIGNS, INITIAL_CLUB_PLANS, INITIAL_CLUB_MEMBERS,
 } from '../data/mockVeloraData';
 
 interface VeloraContextType {
@@ -105,10 +78,7 @@ const LOCAL_STORAGE_KEY = 'velora_master_state_v1';
 
 const getLocalDate = () => {
   const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 };
 
 const parseTime = (value: string): number | null => {
@@ -122,17 +92,14 @@ const parseTime = (value: string): number | null => {
 
 export const VeloraProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [tenants] = useState<Tenant[]>(INITIAL_TENANTS);
-  const [activeTenantId, setActiveTenantIdState] = useState<string>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_active_tenant`);
-    return saved || 'tenant-iago';
-  });
+  const [activeTenantId, setActiveTenantIdState] = useState<string>(() => localStorage.getItem(`${LOCAL_STORAGE_KEY}_active_tenant`) || 'tenant-iago');
   const [branches] = useState<Branch[]>(INITIAL_BRANCHES);
-  const [activeBranchId, setActiveBranchId] = useState<string>('branch-iago-main');
+  const [activeBranchId, setActiveBranchId] = useState('branch-iago-main');
   const [currentMode, setCurrentMode] = useState<'business' | 'professional' | 'client' | 'booking' | 'mobile_preview'>('business');
-  const [activeTab, setActiveTab] = useState<string>('dashboard');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [currentRole, setCurrentRole] = useState<UserRole>('owner');
-  const [activeStaffFilter, setActiveStaffFilter] = useState<string>('all');
-  const [selectedDate, setSelectedDate] = useState<string>(getLocalDate);
+  const [activeStaffFilter, setActiveStaffFilter] = useState('all');
+  const [selectedDate, setSelectedDate] = useState(getLocalDate);
 
   const [staffList, setStaffList] = useState<StaffMember[]>(() => {
     const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_staff`);
@@ -175,20 +142,16 @@ export const VeloraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_club_members`);
     return saved ? JSON.parse(saved) : INITIAL_CLUB_MEMBERS;
   });
-  const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_theme`);
-    return (saved as ThemeMode) || 'light';
-  });
-  const [colorPalette, setColorPalette] = useState<ColorPalette>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_palette`);
-    return (saved as ColorPalette) || 'gold';
-  });
+  const [themeMode, setThemeMode] = useState<ThemeMode>(() => (localStorage.getItem(`${LOCAL_STORAGE_KEY}_theme`) as ThemeMode) || 'light');
+  const [colorPalette, setColorPalette] = useState<ColorPalette>(() => (localStorage.getItem(`${LOCAL_STORAGE_KEY}_palette`) as ColorPalette) || 'gold');
+  // Prevent a rapid double click from generating duplicate payments before React commits state.
+  const checkoutStarted = useRef(new Set<string>());
 
-  const toggleTheme = () => setThemeMode(prev => prev === 'dark' ? 'light' : 'dark');
+  const toggleTheme = () => setThemeMode(previous => previous === 'dark' ? 'light' : 'dark');
   const toggleThemeMode = toggleTheme;
 
   const toggleMemberStatus = (memberId: string) => {
-    setClubMembersList(prev => prev.map(member => member.id === memberId
+    setClubMembersList(previous => previous.map(member => member.id === memberId
       ? { ...member, status: member.status === 'active' ? 'pending_payment' : 'active' }
       : member));
   };
@@ -203,13 +166,11 @@ export const VeloraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   useEffect(() => { localStorage.setItem(`${LOCAL_STORAGE_KEY}_campaigns`, JSON.stringify(campaignsList)); }, [campaignsList]);
   useEffect(() => { localStorage.setItem(`${LOCAL_STORAGE_KEY}_club_plans`, JSON.stringify(clubPlansList)); }, [clubPlansList]);
   useEffect(() => { localStorage.setItem(`${LOCAL_STORAGE_KEY}_club_members`, JSON.stringify(clubMembersList)); }, [clubMembersList]);
-
   useEffect(() => {
     localStorage.setItem(`${LOCAL_STORAGE_KEY}_palette`, colorPalette);
     document.body.classList.remove('palette-default', 'palette-gold', 'palette-cobalt', 'palette-emerald');
     document.body.classList.add(colorPalette === 'default' ? 'palette-gold' : `palette-${colorPalette}`);
   }, [colorPalette]);
-
   useEffect(() => {
     localStorage.setItem(`${LOCAL_STORAGE_KEY}_theme`, themeMode);
     document.documentElement.classList.toggle('dark', themeMode === 'dark');
@@ -220,202 +181,178 @@ export const VeloraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const activeTenant = tenants.find(tenant => tenant.id === activeTenantId) || tenants[0];
   const activeBranch = branches.find(branch => branch.id === activeBranchId && branch.tenantId === activeTenantId)
-    || branches.find(branch => branch.tenantId === activeTenantId)
-    || branches[0];
-
-  const setActiveTenantId = (newTenantId: string) => {
-    setActiveTenantIdState(newTenantId);
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_active_tenant`, newTenantId);
-    const tenantBranch = branches.find(branch => branch.tenantId === newTenantId);
-    if (tenantBranch) setActiveBranchId(tenantBranch.id);
+    || branches.find(branch => branch.tenantId === activeTenantId) || branches[0];
+  const setActiveTenantId = (id: string) => {
+    setActiveTenantIdState(id);
+    localStorage.setItem(`${LOCAL_STORAGE_KEY}_active_tenant`, id);
+    const branch = branches.find(item => item.tenantId === id);
+    if (branch) setActiveBranchId(branch.id);
     setActiveStaffFilter('all');
   };
 
-  const tenantStaff = staffList.filter(member => member.tenantId === activeTenant.id);
-  const tenantServices = servicesList.filter(service => service.tenantId === activeTenant.id);
-  const tenantCategories = categoriesList.filter(category => category.tenantId === activeTenant.id);
-  const tenantCustomers = customersList.filter(customer => customer.tenantId === activeTenant.id);
-  const tenantAppointments = appointmentsList.filter(appointment => appointment.tenantId === activeTenant.id);
-  const tenantTransactions = transactionsList.filter(transaction => transaction.tenantId === activeTenant.id);
+  const tenantStaff = staffList.filter(item => item.tenantId === activeTenant.id);
+  const tenantServices = servicesList.filter(item => item.tenantId === activeTenant.id);
+  const tenantCategories = categoriesList.filter(item => item.tenantId === activeTenant.id);
+  const tenantCustomers = customersList.filter(item => item.tenantId === activeTenant.id);
+  const tenantAppointments = appointmentsList.filter(item => item.tenantId === activeTenant.id);
+  const tenantTransactions = transactionsList.filter(item => item.tenantId === activeTenant.id);
   const tenantInventory = inventoryList.filter(item => item.tenantId === activeTenant.id);
-  const tenantCampaigns = campaignsList.filter(campaign => campaign.tenantId === activeTenant.id);
-  const tenantClubPlans = clubPlansList.filter(plan => plan.tenantId === activeTenant.id);
-  const tenantClubMembers = clubMembersList.filter(member => member.tenantId === activeTenant.id);
+  const tenantCampaigns = campaignsList.filter(item => item.tenantId === activeTenant.id);
+  const tenantClubPlans = clubPlansList.filter(item => item.tenantId === activeTenant.id);
+  const tenantClubMembers = clubMembersList.filter(item => item.tenantId === activeTenant.id);
 
   const updateInventoryStock = (id: string, delta: number) => {
-    setInventoryList(prev => prev.map(item => item.id === id ? {
+    setInventoryList(previous => previous.map(item => item.id === id ? {
       ...item,
       currentStock: Math.max(0, item.currentStock + delta),
       lastRestockDate: delta > 0 ? getLocalDate() : item.lastRestockDate,
     } : item));
   };
-  const addInventoryItem = (itemData: Omit<InventoryItem, 'id' | 'lastRestockDate'>) => {
-    setInventoryList(prev => [...prev, { ...itemData, id: `inv-${Date.now()}`, lastRestockDate: getLocalDate() }]);
+  const addInventoryItem = (data: Omit<InventoryItem, 'id' | 'lastRestockDate'>) => {
+    setInventoryList(previous => [...previous, { ...data, id: `inv-${Date.now()}`, lastRestockDate: getLocalDate() }]);
   };
   const triggerCampaign = (id: string) => {
-    setCampaignsList(prev => prev.map(campaign => campaign.id === id
-      ? { ...campaign, status: 'sent', sentAt: getLocalDate() }
-      : campaign));
+    setCampaignsList(previous => previous.map(item => item.id === id ? { ...item, status: 'sent', sentAt: getLocalDate() } : item));
   };
 
-  const addAppointment = (aptData: Omit<Appointment, 'id' | 'createdAt'>) => {
-    const newStart = parseTime(aptData.startTime);
-    const newEnd = parseTime(aptData.endTime);
-    const selectedService = servicesList.find(service => service.id === aptData.serviceId && service.tenantId === aptData.tenantId);
-    const selectedStaff = staffList.find(member => member.id === aptData.professionalId && member.tenantId === aptData.tenantId && member.isActive);
-    const customer = customersList.find(item => item.id === aptData.customerId && item.tenantId === aptData.tenantId);
-    const dateMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(aptData.date);
-    const appointmentDate = dateMatch ? new Date(Number(dateMatch[1]), Number(dateMatch[2]) - 1, Number(dateMatch[3])) : null;
+  const addAppointment = (data: Omit<Appointment, 'id' | 'createdAt'>) => {
+    const start = parseTime(data.startTime);
+    const end = parseTime(data.endTime);
+    const service = servicesList.find(item => item.id === data.serviceId && item.tenantId === data.tenantId);
+    const professional = staffList.find(item => item.id === data.professionalId && item.tenantId === data.tenantId && item.isActive);
+    const customer = customersList.find(item => item.id === data.customerId && item.tenantId === data.tenantId);
+    const dateParts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(data.date);
+    const date = dateParts ? new Date(Number(dateParts[1]), Number(dateParts[2]) - 1, Number(dateParts[3])) : null;
 
-    if (!newStart || newEnd === null || newEnd <= newStart) {
-      return { success: false, message: 'Informe um horário de início e término válidos.' };
-    }
-    if (!appointmentDate || Number.isNaN(appointmentDate.getTime()) || getLocalDate() !== aptData.date && dateMatch && (appointmentDate.getFullYear() !== Number(dateMatch[1]) || appointmentDate.getMonth() !== Number(dateMatch[2]) - 1 || appointmentDate.getDate() !== Number(dateMatch[3]))) {
+    if (start === null || end === null || end <= start) return { success: false, message: 'Informe um horário de início e término válidos.' };
+    if (!date || !dateParts || date.getFullYear() !== Number(dateParts[1]) || date.getMonth() !== Number(dateParts[2]) - 1 || date.getDate() !== Number(dateParts[3])) {
       return { success: false, message: 'Selecione uma data válida para o agendamento.' };
     }
-    if (!selectedService || !selectedStaff || !customer) {
+    if (!service || !professional || !customer) {
       return { success: false, message: 'Cliente, serviço ou profissional não pertence a esta unidade ou não está disponível.' };
     }
-    if (newEnd - newStart !== selectedService.durationMinutes) {
-      return { success: false, message: 'O horário de término não corresponde à duração do serviço selecionado.' };
-    }
+    if (!professional.serviceIds.includes(service.id)) return { success: false, message: 'Este profissional não está habilitado para realizar o serviço selecionado.' };
+    if (end - start !== service.durationMinutes) return { success: false, message: 'O horário de término não corresponde à duração do serviço selecionado.' };
 
-    const dayOfWeek = appointmentDate.getDay();
-    const shiftStart = parseTime(selectedStaff.workingHours.start);
-    const shiftEnd = parseTime(selectedStaff.workingHours.end);
-    const occupiedEnd = newEnd + Math.max(0, selectedService.bufferMinutes || 0);
-    if (!selectedStaff.workingHours.days.includes(dayOfWeek) || shiftStart === null || shiftEnd === null || newStart < shiftStart || occupiedEnd > shiftEnd) {
+    const weekday = date.getDay();
+    const workStart = parseTime(professional.workingHours.start);
+    const workEnd = parseTime(professional.workingHours.end);
+    const occupiedEnd = end + Math.max(0, service.bufferMinutes || 0);
+    if (!professional.workingHours.days.includes(weekday) || workStart === null || workEnd === null || start < workStart || occupiedEnd > workEnd) {
       return { success: false, message: 'O profissional não atende nesse dia ou horário. Escolha um horário dentro da disponibilidade.' };
     }
 
-    const hasConflict = appointmentsList.some(existing => {
-      if (existing.tenantId !== aptData.tenantId || existing.date !== aptData.date || existing.professionalId !== aptData.professionalId || existing.status === 'cancelled') return false;
+    const conflict = appointmentsList.some(existing => {
+      if (existing.tenantId !== data.tenantId || existing.date !== data.date || existing.professionalId !== data.professionalId || ['cancelled', 'no_show'].includes(existing.status)) return false;
       const existingStart = parseTime(existing.startTime);
       const existingEnd = parseTime(existing.endTime);
       if (existingStart === null || existingEnd === null) return false;
-      const existingService = servicesList.find(service => service.id === existing.serviceId && service.tenantId === existing.tenantId);
+      const existingService = servicesList.find(item => item.id === existing.serviceId && item.tenantId === existing.tenantId);
       const existingOccupiedEnd = existingEnd + Math.max(0, existingService?.bufferMinutes || 0);
-      return newStart < existingOccupiedEnd && occupiedEnd > existingStart;
+      return start < existingOccupiedEnd && occupiedEnd > existingStart;
     });
-    if (hasConflict) {
-      return { success: false, message: 'Esse horário conflita com outro atendimento ou com o intervalo de preparação. Escolha outro horário.' };
-    }
+    if (conflict) return { success: false, message: 'Esse horário conflita com outro atendimento ou com o intervalo de preparação. Escolha outro horário.' };
 
-    const validBranch = branches.find(branch => branch.id === aptData.branchId && branch.tenantId === aptData.tenantId)
-      || branches.find(branch => branch.tenantId === aptData.tenantId);
-    if (!validBranch) return { success: false, message: 'Não foi encontrada uma unidade válida para este agendamento.' };
+    const branch = branches.find(item => item.id === data.branchId && item.tenantId === data.tenantId)
+      || branches.find(item => item.tenantId === data.tenantId);
+    if (!branch) return { success: false, message: 'Não foi encontrada uma unidade válida para este agendamento.' };
 
-    const newAppointment: Appointment = {
-      ...aptData,
-      branchId: validBranch.id,
-      id: `apt-${Date.now()}`,
-      createdAt: new Date().toISOString(),
-    };
-    setAppointmentsList(prev => [newAppointment, ...prev]);
-    setCustomersList(prev => prev.map(item => item.id === aptData.customerId ? {
-      ...item,
-      appointmentsCount: item.appointmentsCount + 1,
-      lastVisit: aptData.date,
+    const appointment: Appointment = { ...data, branchId: branch.id, id: `apt-${Date.now()}`, createdAt: new Date().toISOString() };
+    setAppointmentsList(previous => [appointment, ...previous]);
+    setCustomersList(previous => previous.map(item => item.id === data.customerId ? {
+      ...item, appointmentsCount: item.appointmentsCount + 1, lastVisit: data.date,
     } : item));
-    return { success: true, appointment: newAppointment };
+    return { success: true, appointment };
   };
 
   const updateAppointmentStatus = (id: string, status: AppointmentStatus) => {
-    setAppointmentsList(prev => prev.map(appointment => appointment.id === id ? { ...appointment, status } : appointment));
-  };
-  const checkoutAppointment = (id: string, paymentMethod: PaymentMethod) => {
-    const targetAppointment = appointmentsList.find(appointment => appointment.id === id);
-    if (!targetAppointment || targetAppointment.status === 'completed') return;
-    setAppointmentsList(prev => prev.map(appointment => appointment.id === id
-      ? { ...appointment, status: 'completed', paymentStatus: 'paid', paymentMethod }
-      : appointment));
-    const transaction: FinancialTransaction = {
-      id: `tx-${Date.now()}`,
-      tenantId: targetAppointment.tenantId,
-      type: 'income',
-      category: 'Serviço',
-      description: `Atendimento: ${targetAppointment.serviceName} (${targetAppointment.customerName})`,
-      amountInCents: targetAppointment.priceInCents,
-      date: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      paymentMethod,
-      status: 'completed',
-      appointmentId: targetAppointment.id,
-      professionalId: targetAppointment.professionalId,
-    };
-    setTransactionsList(prev => [transaction, ...prev]);
-    setCustomersList(prev => prev.map(customer => customer.id === targetAppointment.customerId ? {
-      ...customer,
-      totalSpentInCents: customer.totalSpentInCents + targetAppointment.priceInCents,
-      lastVisit: targetAppointment.date,
-    } : customer));
-    setCashSession(prev => ({
-      ...prev,
-      currentAmountInCents: prev.currentAmountInCents + targetAppointment.priceInCents,
-      totalIncomeInCents: prev.totalIncomeInCents + targetAppointment.priceInCents,
+    setAppointmentsList(previous => previous.map(item => {
+      if (item.id !== id) return item;
+      if (item.status === 'confirmed' && ['in_progress', 'cancelled', 'no_show'].includes(status)) return { ...item, status };
+      if (item.status === 'in_progress' && ['cancelled', 'no_show'].includes(status)) return { ...item, status };
+      return item;
     }));
   };
+
+  const checkoutAppointment = (id: string, paymentMethod: PaymentMethod) => {
+    const appointment = appointmentsList.find(item => item.id === id);
+    if (!appointment || ['completed', 'cancelled', 'no_show'].includes(appointment.status) || checkoutStarted.current.has(id)) return;
+    checkoutStarted.current.add(id);
+    setAppointmentsList(previous => previous.map(item => item.id === id ? {
+      ...item, status: 'completed', paymentStatus: 'paid', paymentMethod,
+    } : item));
+    const transaction: FinancialTransaction = {
+      id: `tx-${Date.now()}`, tenantId: appointment.tenantId, type: 'income', category: 'Serviço',
+      description: `Atendimento: ${appointment.serviceName} (${appointment.customerName})`,
+      amountInCents: appointment.priceInCents, date: new Date().toISOString().replace('T', ' ').substring(0, 16),
+      paymentMethod, status: 'completed', appointmentId: appointment.id, professionalId: appointment.professionalId,
+    };
+    setTransactionsList(previous => [transaction, ...previous]);
+    setCustomersList(previous => previous.map(customer => customer.id === appointment.customerId ? {
+      ...customer, totalSpentInCents: customer.totalSpentInCents + appointment.priceInCents, lastVisit: appointment.date,
+    } : customer));
+    setCashSession(previous => ({
+      ...previous, currentAmountInCents: previous.currentAmountInCents + appointment.priceInCents,
+      totalIncomeInCents: previous.totalIncomeInCents + appointment.priceInCents,
+    }));
+  };
+
   const cancelAppointment = (id: string, reason?: string) => {
-    setAppointmentsList(prev => prev.map(appointment => appointment.id === id ? {
-      ...appointment,
-      status: 'cancelled',
-      notes: reason ? `${appointment.notes ? `${appointment.notes} | ` : ''}Motivo cancelamento: ${reason}` : appointment.notes,
-    } : appointment));
+    setAppointmentsList(previous => previous.map(item => {
+      if (item.id !== id || !['confirmed', 'in_progress'].includes(item.status)) return item;
+      return { ...item, status: 'cancelled', notes: reason ? `${item.notes ? `${item.notes} | ` : ''}Motivo cancelamento: ${reason}` : item.notes };
+    }));
   };
   const addCustomer = (data: Omit<Customer, 'id' | 'appointmentsCount' | 'totalSpentInCents' | 'lastVisit' | 'firstVisit'>): Customer => {
-    const newCustomer: Customer = { ...data, id: `cust-${Date.now()}`, appointmentsCount: 0, totalSpentInCents: 0, lastVisit: null, firstVisit: getLocalDate() };
-    setCustomersList(prev => [newCustomer, ...prev]);
-    return newCustomer;
+    const customer: Customer = { ...data, id: `cust-${Date.now()}`, appointmentsCount: 0, totalSpentInCents: 0, lastVisit: null, firstVisit: getLocalDate() };
+    setCustomersList(previous => [customer, ...previous]);
+    return customer;
   };
-  const updateCustomer = (id: string, data: Partial<Customer>) => setCustomersList(prev => prev.map(customer => customer.id === id ? { ...customer, ...data } : customer));
-  const addService = (data: Omit<Service, 'id'>) => setServicesList(prev => [...prev, { ...data, id: `srv-${Date.now()}` }]);
-  const updateService = (id: string, data: Partial<Service>) => setServicesList(prev => prev.map(service => service.id === id ? { ...service, ...data } : service));
-  const addStaff = (data: Omit<StaffMember, 'id' | 'completedAppointmentsCount' | 'rating'>) => setStaffList(prev => [...prev, { ...data, id: `staff-${Date.now()}`, completedAppointmentsCount: 0, rating: 5 }]);
+  const updateCustomer = (id: string, data: Partial<Customer>) => setCustomersList(previous => previous.map(item => item.id === id ? { ...item, ...data } : item));
+  const addService = (data: Omit<Service, 'id'>) => setServicesList(previous => [...previous, { ...data, id: `srv-${Date.now()}` }]);
+  const updateService = (id: string, data: Partial<Service>) => setServicesList(previous => previous.map(item => item.id === id ? { ...item, ...data } : item));
+  const addStaff = (data: Omit<StaffMember, 'id' | 'completedAppointmentsCount' | 'rating'>) => setStaffList(previous => [...previous, { ...data, id: `staff-${Date.now()}`, completedAppointmentsCount: 0, rating: 5 }]);
   const addTransaction = (data: Omit<FinancialTransaction, 'id' | 'status'>) => {
-    setTransactionsList(prev => [{ ...data, id: `tx-${Date.now()}`, status: 'completed' }, ...prev]);
-    setCashSession(prev => ({
-      ...prev,
-      currentAmountInCents: data.type === 'income' ? prev.currentAmountInCents + data.amountInCents : prev.currentAmountInCents - data.amountInCents,
-      totalIncomeInCents: data.type === 'income' ? prev.totalIncomeInCents + data.amountInCents : prev.totalIncomeInCents,
-      totalExpenseInCents: data.type === 'expense' ? prev.totalExpenseInCents + data.amountInCents : prev.totalExpenseInCents,
+    setTransactionsList(previous => [{ ...data, id: `tx-${Date.now()}`, status: 'completed' }, ...previous]);
+    setCashSession(previous => ({
+      ...previous,
+      currentAmountInCents: data.type === 'income' ? previous.currentAmountInCents + data.amountInCents : previous.currentAmountInCents - data.amountInCents,
+      totalIncomeInCents: data.type === 'income' ? previous.totalIncomeInCents + data.amountInCents : previous.totalIncomeInCents,
+      totalExpenseInCents: data.type === 'expense' ? previous.totalExpenseInCents + data.amountInCents : previous.totalExpenseInCents,
     }));
   };
-  const closeCashSession = () => setCashSession(prev => ({ ...prev, isOpen: false, closedAt: new Date().toISOString() }));
-  const openCashSession = (initialAmountInCents: number) => setCashSession({
+  const closeCashSession = () => setCashSession(previous => ({ ...previous, isOpen: false, closedAt: new Date().toISOString() }));
+  const openCashSession = (amount: number) => setCashSession({
     id: `cash-${Date.now()}`, tenantId: activeTenant.id, branchId: activeBranch.id, isOpen: true,
-    openedAt: new Date().toISOString(), initialAmountInCents, currentAmountInCents: initialAmountInCents,
+    openedAt: new Date().toISOString(), initialAmountInCents: amount, currentAmountInCents: amount,
     totalIncomeInCents: 0, totalExpenseInCents: 0,
   });
 
-  const todayAppointments = tenantAppointments.filter(appointment => appointment.date === selectedDate);
-  const completedToday = todayAppointments.filter(appointment => appointment.status === 'completed');
-  const todayRevenueInCents = completedToday.reduce((sum, appointment) => sum + appointment.priceInCents, 0);
-  const monthRevenueInCents = tenantTransactions.filter(transaction => transaction.type === 'income').reduce((sum, transaction) => sum + transaction.amountInCents, 0);
+  const todayAppointments = tenantAppointments.filter(item => item.date === selectedDate);
+  const completedToday = todayAppointments.filter(item => item.status === 'completed');
+  const todayRevenueInCents = completedToday.reduce((sum, item) => sum + item.priceInCents, 0);
+  const monthRevenueInCents = tenantTransactions.filter(item => item.type === 'income').reduce((sum, item) => sum + item.amountInCents, 0);
   const averageTicketInCents = completedToday.length ? Math.round(todayRevenueInCents / completedToday.length) : 7200;
-  const availableSlotsPerDay = Math.max(1, tenantStaff.filter(member => member.isActive).length * 14);
-  const occupancyRatePercentage = Math.min(100, Math.round(todayAppointments.length / availableSlotsPerDay * 100));
+  const totalSlots = Math.max(1, tenantStaff.filter(item => item.isActive).length * 14);
+  const occupancyRatePercentage = Math.min(100, Math.round(todayAppointments.length / totalSlots * 100));
   const metrics = {
-    todayRevenueInCents,
-    monthRevenueInCents: Math.max(monthRevenueInCents, 3480000),
-    todayAppointmentsCount: todayAppointments.length,
-    todayCompletedCount: completedToday.length,
-    occupancyRatePercentage: occupancyRatePercentage || 78,
-    averageTicketInCents,
-    monthlyGoalInCents: 4500000,
+    todayRevenueInCents, monthRevenueInCents: Math.max(monthRevenueInCents, 3480000),
+    todayAppointmentsCount: todayAppointments.length, todayCompletedCount: completedToday.length,
+    occupancyRatePercentage: occupancyRatePercentage || 78, averageTicketInCents, monthlyGoalInCents: 4500000,
   };
 
   return (
     <VeloraContext.Provider value={{
       currentMode, setCurrentMode, activeTab, setActiveTab, tenants, activeTenant, setActiveTenantId,
-      branches, activeBranch, setActiveBranchId, currentRole, setCurrentRole, activeStaffFilter,
-      setActiveStaffFilter, selectedDate, setSelectedDate, staff: tenantStaff, services: tenantServices,
-      categories: tenantCategories, customers: tenantCustomers, appointments: tenantAppointments,
-      transactions: tenantTransactions, cashSession, aiInsights: INITIAL_AI_INSIGHTS, inventory: tenantInventory,
-      campaigns: tenantCampaigns, clubPlans: tenantClubPlans, clubMembers: tenantClubMembers,
-      themeMode, colorPalette, setColorPalette, activePalette: colorPalette, setActivePalette: setColorPalette,
-      toggleMemberStatus, toggleTheme, toggleThemeMode, updateInventoryStock, addInventoryItem,
-      triggerCampaign, addAppointment, updateAppointmentStatus, checkoutAppointment, cancelAppointment,
-      addCustomer, updateCustomer, addService, updateService, addStaff, addTransaction, closeCashSession,
-      openCashSession, metrics,
+      branches, activeBranch, setActiveBranchId, currentRole, setCurrentRole, activeStaffFilter, setActiveStaffFilter,
+      selectedDate, setSelectedDate, staff: tenantStaff, services: tenantServices, categories: tenantCategories,
+      customers: tenantCustomers, appointments: tenantAppointments, transactions: tenantTransactions, cashSession,
+      aiInsights: INITIAL_AI_INSIGHTS, inventory: tenantInventory, campaigns: tenantCampaigns,
+      clubPlans: tenantClubPlans, clubMembers: tenantClubMembers, themeMode, colorPalette,
+      setColorPalette, activePalette: colorPalette, setActivePalette: setColorPalette, toggleMemberStatus,
+      toggleTheme, toggleThemeMode, updateInventoryStock, addInventoryItem, triggerCampaign, addAppointment,
+      updateAppointmentStatus, checkoutAppointment, cancelAppointment, addCustomer, updateCustomer, addService,
+      updateService, addStaff, addTransaction, closeCashSession, openCashSession, metrics,
     }}>
       {children}
     </VeloraContext.Provider>
