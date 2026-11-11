@@ -1,0 +1,6 @@
+{
+  "summary":  "Plano Mestre de Desenvolvimento e Diagnóstico Arquitetural da VELORA: auditoria minuciosa do projeto atual, proposta de arquitetura multi-tenant segura com PostgreSQL/Prisma, especificação relacional de entidades, novo design do menu em três blocos (Gestão, Financeiro, Crescimento) e roadmap detalhado por fases com critérios de aceite e segurança.",
+  "updatedAt":  "2026-11-10T13:42:46.484217956Z",
+  "requestFeedback":  true,
+  "userFacing":  true
+}

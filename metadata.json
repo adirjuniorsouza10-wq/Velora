@@ -1,0 +1,8 @@
+{
+  "name": "VELORA - Business Management Platform",
+  "description": "Plataforma completa de gestão para barbearias, salões e estética: Agenda inteligente, CRM de clientes, Financeiro, Booking público multi-tenant e Inteligência.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
